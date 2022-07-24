@@ -5,8 +5,16 @@
 /src/Dockerfile.backup
 /src/Dockerfile.debug
 /src/api/__pycache__
+/src/api_trt/__pycache__
+/src/api_trt/modules/__pycache__
+/src/api_trt/modules/converters/__pycache__
 /src/api/modules/__pycache__
 /src/api/modules/utils/__pycache__
+/src/api_trt/modules/model_zoo/__pycache__
+/src/api_trt/modules/model_zoo/detectors/__pycache__
+/src/api_trt/modules/model_zoo/detectors/common/__pycache__
+/src/api_trt/modules/model_zoo/exec_backends/__pycache__
+/src/api_trt/modules/utils/__pycache__
 /src/api/insightface
 /models
 /crops

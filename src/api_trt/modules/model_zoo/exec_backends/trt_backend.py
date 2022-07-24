@@ -1,9 +1,11 @@
+import logging
 import os
+import time
+
+import cupy as cp
 import cv2
 import numpy as np
-import logging
-import cupy as cp
-import time
+
 from .trt_loader import TrtModel
 
 

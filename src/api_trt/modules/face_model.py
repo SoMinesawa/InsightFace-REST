@@ -1,19 +1,18 @@
+import asyncio
 import collections
+import logging
+import time
+from functools import partial
 from typing import Dict, List, Optional
+
+import cv2
 import numpy as np
 from numpy.linalg import norm
-import cv2
-import logging
-from functools import partial
 
-import time
-from modules.utils import fast_face_align as face_align
-
-from modules.model_zoo.getter import get_model
 from modules.imagedata import ImageData, resize_image
-from modules.utils.helpers import to_chunks, colorize_log, validate_max_size
-
-import asyncio
+from modules.model_zoo.getter import get_model
+from modules.utils import fast_face_align as face_align
+from modules.utils.helpers import colorize_log, to_chunks, validate_max_size
 
 Face = collections.namedtuple("Face", ['bbox', 'landmark', 'det_score', 'embedding', 'gender', 'age', 'embedding_norm',
                                        'normed_embedding', 'facedata', 'scale', 'num_det','mask','mask_probs'])
@@ -30,7 +29,7 @@ device2ctx = {
 class Detector:
     def __init__(self, device: str = 'cuda', det_name: str = 'retinaface_r50_v1', max_size=None,
                  backend_name: str = 'trt', force_fp16: bool = False, triton_uri=None, max_batch_size: int = 1,
-                 root_dir='/models'):
+                 root_dir='./models'):
         if max_size is None:
             max_size = [640, 480]
 
@@ -225,6 +224,10 @@ class FaceAnalysis:
         # Initialize resied images iterator
         res_images = map(_partial_resize, images)
         batches = to_chunks(res_images, self.max_det_batch_size)
+        #print("batches@get:", batches)
+        #print(type(batches))
+        #print(len(list(batches)))
+        
 
         faces = []
         faces_per_img = {}

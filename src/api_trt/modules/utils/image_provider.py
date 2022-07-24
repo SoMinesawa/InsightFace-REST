@@ -1,14 +1,14 @@
+import base64
+import logging
 import os
-from typing import Dict
 import time
 import traceback
-import logging
-import base64
-import numpy as np
+from typing import Dict
+
 import cv2
 import httpx
+import numpy as np
 from modules.utils.helpers import tobool
-
 from turbojpeg import TurboJPEG
 
 if tobool(os.getenv('USE_NVJPEG', False)):

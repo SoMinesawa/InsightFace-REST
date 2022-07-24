@@ -1,23 +1,20 @@
-import os
 import logging
+import os
 import time
-from typing import Optional, List
+from typing import List, Optional
 
 import msgpack
-
-from fastapi import FastAPI, File, Form, UploadFile, Header
+from fastapi import FastAPI, File, Form, Header, UploadFile
 from fastapi.encoders import jsonable_encoder
-from starlette.staticfiles import StaticFiles
-from starlette.responses import StreamingResponse, RedirectResponse, PlainTextResponse
+from fastapi.openapi.docs import (get_redoc_html, get_swagger_ui_html,
+                                  get_swagger_ui_oauth2_redirect_html)
 from fastapi.responses import UJSONResponse
-from fastapi.openapi.docs import (
-    get_redoc_html,
-    get_swagger_ui_html,
-    get_swagger_ui_oauth2_redirect_html,
-)
+from starlette.responses import (PlainTextResponse, RedirectResponse,
+                                 StreamingResponse)
+from starlette.staticfiles import StaticFiles
 
-from modules.processing import Processing
 from env_parser import EnvConfigs
+from modules.processing import Processing
 from schemas import BodyDraw, BodyExtract
 
 __version__ = "0.7.3.0"

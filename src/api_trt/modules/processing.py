@@ -1,18 +1,20 @@
-from typing import Dict, List, Optional, Union
-import traceback
-import io
 import base64
-import time
-import os
+import io
 import logging
-import httpx
-
-import numpy as np
-import cv2
+import os
+import sys
+import time
+import traceback
 from functools import partial
+from typing import Dict, List, Optional, Union
 
-from .face_model import FaceAnalysis, Face
+import cv2
+import httpx
+import numpy as np
+
 from modules.utils.image_provider import get_images
+
+from .face_model import Face, FaceAnalysis
 
 
 class Serializer:
@@ -65,26 +67,22 @@ def serialize_face(_face_dict: dict, return_face_data: bool, return_landmarks: b
 
 
 class Processing:
+    def __init__(self, env_configs, root_dir: str = './models'):
 
-    def __init__(self, det_name: str = 'retinaface_r50_v1', rec_name: str = 'arcface_r100_v1',
-                 ga_name: str = 'genderage_v1', mask_detector: str = 'mask_detector', device: str = 'cuda',
-                 max_size: List[int] = None,
-                 backend_name: str = 'trt', max_rec_batch_size: int = 1, max_det_batch_size: int = 1,
-                 force_fp16: bool = False, triton_uri=None, root_dir: str = '/models'):
+        if env_configs.defaults.max_size is None:
+            env_configs.defaults.max_size = [640, 480]
 
-        if max_size is None:
-            max_size = [640, 480]
-
-        self.max_rec_batch_size = max_rec_batch_size
-        self.max_det_batch_size = max_det_batch_size
-        self.det_name = det_name
-        self.max_size = max_size
-        self.model = FaceAnalysis(det_name=det_name, rec_name=rec_name, ga_name=ga_name,
-                                  mask_detector=mask_detector, device=device,
-                                  max_size=self.max_size, max_rec_batch_size=self.max_rec_batch_size,
+        self.max_rec_batch_size = env_configs.models.rec_batch_size
+        self.max_det_batch_size = env_configs.models.det_batch_size
+        self.det_name = env_configs.models.det_name
+        self.max_size = env_configs.defaults.max_size
+        self.model = FaceAnalysis(det_name=env_configs.models.det_name, rec_name=env_configs.models.rec_name, 
+                                  ga_name=env_configs.models.ga_name, mask_detector=env_configs.models.mask_detector, 
+                                  device=env_configs.models.device, max_size=self.max_size, 
+                                  max_rec_batch_size=self.max_rec_batch_size,
                                   max_det_batch_size=self.max_det_batch_size,
-                                  backend_name=backend_name, force_fp16=force_fp16, triton_uri=triton_uri,
-                                  root_dir=root_dir
+                                  backend_name=env_configs.models.backend_name, force_fp16=env_configs.models.fp16, 
+                                  triton_uri=env_configs.models.triton_uri, root_dir=root_dir
                                   )
 
     def __iterate_images(self, crops):
@@ -173,6 +171,7 @@ class Processing:
                       detect_masks: bool = False,
                       verbose_timings=True, api_ver: str = "1"):
 
+       
         if not max_size:
             max_size = self.max_size
 

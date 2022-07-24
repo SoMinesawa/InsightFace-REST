@@ -1,8 +1,9 @@
-import cupy as cp
-import numpy as np
 import os
-import tensorrt as trt
+
+import cupy as cp
 import cupyx
+import numpy as np
+import tensorrt as trt
 
 
 # Simple helper data class that's a little nicer to use than a 2-tuple.
@@ -60,6 +61,7 @@ class TrtModel(object):
         assert os.path.exists(self.engine_file), "Engine file doesn't exist"
 
         runtime = trt.Runtime(TrtModel.TRT_LOGGER)
+        #print(self.engine_file)
         with open(self.engine_file, 'rb') as engine_file:
             self.engine = runtime.deserialize_cuda_engine(engine_file.read())
 

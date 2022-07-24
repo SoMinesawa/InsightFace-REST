@@ -1,7 +1,8 @@
-import os
-from itertools import chain, islice
-from distutils import util
 import logging
+import os
+from distutils import util
+from itertools import chain, islice
+
 
 def prepare_folders(paths):
     for path in paths:

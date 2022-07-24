@@ -1,10 +1,10 @@
-import os
 import logging
+import os
 
-from modules.utils.helpers import parse_size, tobool, validate_max_size
-from modules.model_zoo.getter import prepare_backend
-from modules.configs import Configs
 from env_parser import EnvConfigs
+from modules.configs import Configs
+from modules.model_zoo.getter import prepare_backend
+from modules.utils.helpers import parse_size, tobool, validate_max_size
 
 log_level = os.getenv('LOG_LEVEL', 'INFO')
 
@@ -15,9 +15,9 @@ logging.basicConfig(
 )
 
 
-def prepare_models(root_dir: str = '/models'):
+def prepare_models(env_configs:EnvConfigs, root_dir: str = './models'):
     model_configs = Configs(models_dir=root_dir)
-    env_configs = EnvConfigs()
+    #env_configs = EnvConfigs()
     rec_name = env_configs.models.rec_name
     det_name = env_configs.models.det_name
     ga_name = env_configs.models.ga_name

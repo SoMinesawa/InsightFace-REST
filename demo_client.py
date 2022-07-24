@@ -1,18 +1,19 @@
-import os
-import base64
-import requests
-import time
-import glob
-import multiprocessing
-import numpy as np
-from itertools import chain, islice, cycle
-from functools import partial
-from distutils import util
-import ujson
-import logging
-import shutil
 import argparse
+import base64
+import glob
+import logging
+import multiprocessing
+import os
+import shutil
+import time
+from distutils import util
+from functools import partial
+from itertools import chain, cycle, islice
+
 import msgpack
+import numpy as np
+import requests
+import ujson
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 test_cat = os.path.join(dir_path, 'images')
@@ -107,12 +108,16 @@ class IFRClient:
                    api_ver='2',
                    msgpack=use_msgpack,
                    )
-
+        #print("req:", req)
         resp = self.sess.post(extract_uri, json=req, timeout=120)
+        #print("resp:", resp)    #後展開するだけ
+
         if resp.headers['content-type'] == 'application/x-msgpack':
             content = msgpack.loads(resp.content)
         else:
             content = ujson.loads(resp.content)
+        
+        #print("content:", content) 完成！
 
         images = content.get('data')
         for im in images:
@@ -138,11 +143,11 @@ if __name__ == "__main__":
 
     parser.add_argument('-p', '--port', default=18081, type=int, help='Port')
     parser.add_argument('-u', '--uri', default='http://localhost', type=str, help='Server hostname or ip with protocol')
-    parser.add_argument('-i', '--iters', default=10, type=int, help='Number of iterations')
+    parser.add_argument('-i', '--iters', default=1, type=int, help='Number of iterations')
     parser.add_argument('-t', '--threads', default=10, type=int, help='Number of threads')
-    parser.add_argument('-b', '--batch', default=1, type=int, help='Batch size')
+    parser.add_argument('-b', '--batch', default=64, type=int, help='Batch size')
     parser.add_argument('-d', '--dir', default=None, type=str, help='Path to directory with images')
-    parser.add_argument('-n', '--num_files', default=1000, type=int, help='Number of files per test')
+    parser.add_argument('-n', '--num_files', default=1, type=int, help='Number of files per test')
     parser.add_argument('-lf', '--limit_faces', default=0, type=int, help='Number of files per test')
     parser.add_argument('--embed', default='True', type=str, help='Extract embeddings, otherwise run detection only')
     parser.add_argument('--embed_only', default='False', type=str, help='Omit detection step. Expects already cropped 112x112 images')
@@ -178,6 +183,7 @@ if __name__ == "__main__":
         print(f'No data directory provided. Using `{files[0]}` for testing.')
     else:
         files = glob.glob(os.path.join(args.dir, '*/*.*'))
+        #files = glob.glob(os.path.join(args.dir, 'test_images/0.jpg'))
         files = [file for file in files if os.path.splitext(file)[1].lower() in allowed_ext]
         if args.dir.startswith('src/api_trt/'):
             files = [file.replace('src/api_trt/', '') for file in files]
@@ -196,9 +202,13 @@ if __name__ == "__main__":
 
     im_batches = to_chunks(files, args.batch)
     im_batches = [list(chunk) for chunk in im_batches]
+    #print("im_batches:", im_batches)
 
     _part_extract_vecs = partial(client.extract, extract_embedding=to_bool(args.embed), embed_only=to_bool(args.embed_only), mode=mode,
                                  limit_faces = args.limit_faces)
+    
+    #print(type(_part_extract_vecs))
+    #print(_part_extract_vecs)
 
     pool = multiprocessing.Pool(args.threads)
     speeds = []
@@ -224,3 +234,4 @@ if __name__ == "__main__":
           f'    min:    {np.min(speeds):.3f} im/sec\n'
           f'    max:    {np.max(speeds):.3f} im/sec\n'
           )
+

@@ -16,8 +16,8 @@ n_gpu=1
 # memory for desired number. Try running with n_workers=1 to estimate memory consumption
 # per instance.
 # Take note: larger number won't speed up single image inference time, it'll increase
-# concurrent throughput.
-n_workers=1
+# concurrent throughput. !!!
+n_workers=4
 
 # Maximum image size (W,H). If your input images has fixed image size set this
 # value proportional or equal to it. Otherwise select value based on your
@@ -30,8 +30,8 @@ max_size=640,640
 
 # Force FP16 mode for building TensorRT engines, even if it's not supported.
 # Please check that your GPU supports FP16, otherwise performance may drop.
-# For GPUs supporting it gives about 2x performance boost.
-force_fp16=False
+# For GPUs supporting it gives about 2x performance boost.   !!!
+force_fp16=True
 
 
 # DET MODELS:
@@ -40,17 +40,17 @@ force_fp16=False
 ## scrfd_500m_gnkps, scrfd_2.5g_gnkps, scrfd_10g_gnkps
 ## yolov5l-face, yolov5m-face, yolov5s-face, yolov5n-face, yolov5n-0.5
 ## Note: SCRFD family models requires input image shape dividable by 32, i.e 640x640, 1024x768.
-det_model=scrfd_10g_gnkps
+det_model=retinaface_r50_v1
 
-## Maximum batch size for detection model
-det_batch_size=1
+## Maximum batch size for detection model !!!
+det_batch_size=1    #max=1? if retinaface
 
 # REC MODELS:
 ## None, arcface_r100_v1, glintr100, w600k_r50, w600k_mbf
-rec_model=glintr100
+rec_model=arcface_r100_v1
 
-## Maximum batch size for recognition model (this value also applies for GA and mask detection models)
-rec_batch_size=1
+## Maximum batch size for recognition model (this value also applies for GA and mask detection models) !!!
+rec_batch_size=64   #max=64? if arcface
 
 
 # Mask detection models
@@ -132,8 +132,8 @@ for i in $(seq 0 $(($n_gpu - 1)) ); do
         -v $PWD/src/api_trt:/app\
         --health-cmd='curl -f http://localhost:18080/info || exit 1'\
         --health-interval=1m\
-        --health-timeout=10s\
-        --health-retries=3\
+        --health-timeout=30s\
+        --health-retries=30\
         --name=$name\
         $IMAGE:$TAG
 done
